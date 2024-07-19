@@ -6,6 +6,10 @@ import { connectDB } from "./config/db.js";
 const app = express();
 const PORT = ENV_VARS.PORT;
 
+// middleware
+app.use(express.json());
+
+// routes
 app.use("/api/v1/auth", authRoutes);
 
 app.listen(PORT, () => {
