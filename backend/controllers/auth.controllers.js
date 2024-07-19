@@ -1,5 +1,6 @@
 import { User } from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
+import { generateTokenAndSetCookie } from "../utils/generateToken.js";
 
 const signup = async (req, res) => {
   try {
@@ -61,6 +62,8 @@ const signup = async (req, res) => {
       image,
     });
 
+    generateTokenAndSetCookie(newUser._id, res);
+
     await newUser.save();
 
     return res.status(201).json({
@@ -68,21 +71,79 @@ const signup = async (req, res) => {
       message: "New user successfully created.",
       user: {
         ...newUser._doc,
+        password: "",
       },
     });
   } catch (error) {
+    console.error("Error in the signup controller");
     res
       .status(500)
       .json({ success: false, message: "Internal server error", error: error });
   }
 };
 
-const signin = (req, res) => {
-  res.send("signin");
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // if there is no login data
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
+    }
+
+    const user = await User.findOne({ email: email });
+
+    // if user not found
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
+    }
+
+    const isPasswordCorrect = await bcryptjs.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Incorrect password." });
+    }
+
+    generateTokenAndSetCookie(user._id, res);
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successfull.",
+      user: {
+        ...user._doc,
+        password: "",
+      },
+    });
+  } catch (error) {
+    console.error("Error in login controller");
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      error: error,
+    });
+  }
 };
 
-const signout = (req, res) => {
-  res.send("signout");
+const logout = async (req, res) => {
+  try {
+    res.clearCookie("jwt-netflix");
+    return res
+      .status(200)
+      .json({ success: true, message: "Logged out successfully." });
+  } catch (error) {
+    console.error("Error in logout controller.");
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      error: error,
+    });
+  }
 };
 
-export { signup, signin, signout };
+export { signup, login, logout };
