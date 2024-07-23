@@ -14,10 +14,10 @@ const searchPerson = async (req, res) => {
 
     await User.findByIdAndUpdate(req.user._id, {
       $push: {
-        seachHistory: {
-          id: res.results[0].id,
-          image: res.results[0].profile_path,
-          title: res.results[0].name,
+        searchHistory: {
+          id: data.results[0].id,
+          image: data.results[0].profile_path,
+          title: data.results[0].name,
           searchType: 'person',
           createdAt: new Date(),
         },
@@ -46,11 +46,11 @@ const searchMovie = async (req, res) => {
 
     await User.findByIdAndUpdate(req.user._id, {
       $push: {
-        seachHistory: {
-          id: res.results[0].id,
-          image: res.results[0].poster_path,
-          title: res.results[0].name,
-          searchType: 'movie',
+        searchHistory: {
+          id: data.results[0].id,
+          image: data.results[0].profile_path,
+          title: data.results[0].name,
+          searchType: 'person',
           createdAt: new Date(),
         },
       },
@@ -78,7 +78,7 @@ const searchTv = async (req, res) => {
 
     await User.findByIdAndUpdate(req.user._id, {
       $push: {
-        seachHistory: {
+        searchHistory: {
           id: res.results[0].id,
           image: res.results[0].poster_path,
           title: res.results[0].name,
@@ -96,4 +96,39 @@ const searchTv = async (req, res) => {
   }
 };
 
-export { searchMovie, searchPerson, searchTv };
+const getSearchHistory = async (req, res) => {
+  try {
+    res.status(200).json({ success: true, content: req.user.searchHistory });
+  } catch (error) {
+    console.error('Error in get searchHIstory controller : ', error.message);
+    res.status(500).json({ success: false, message: 'internal server error' });
+  }
+};
+
+const deleteSearchItem = async (req, res) => {
+  let { id } = req.params;
+  id = parseInt(id);
+
+  try {
+    await User.findByIdAndUpdate(req.user._id),
+      {
+        $pull: {
+          searchHistory: { id: id },
+        },
+      };
+    res
+      .status(200)
+      .json({ success: true, message: 'Item removed from search history' });
+  } catch (error) {
+    console.error('Error in deleteSearchitem controller : ', error.message);
+    res.status(500).json({ success: false, message: 'internal server error' });
+  }
+};
+
+export {
+  searchMovie,
+  searchPerson,
+  searchTv,
+  getSearchHistory,
+  deleteSearchItem,
+};
