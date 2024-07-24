@@ -1,7 +1,6 @@
-import { User } from "../models/user.model.js";
-import bcryptjs from "bcryptjs";
-import { generateTokenAndSetCookie } from "../utils/generateToken.js";
-
+import { User } from '../models/user.model.js';
+import bcryptjs from 'bcryptjs';
+import { generateTokenAndSetCookie } from '../utils/generateToken.js';
 const signup = async (req, res) => {
   try {
     const { email, password, username } = req.body;
@@ -10,7 +9,7 @@ const signup = async (req, res) => {
     if (!email || !password || !username) {
       return res
         .status(400)
-        .json({ success: false, message: "All fields are required" });
+        .json({ success: false, message: 'All fields are required' });
     }
 
     // verify if email format
@@ -28,7 +27,7 @@ const signup = async (req, res) => {
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
-        message: "Password must be atleast 6 characters.",
+        message: 'Password must be atleast 6 characters.',
       });
     }
 
@@ -38,7 +37,7 @@ const signup = async (req, res) => {
     if (existingUserByEmail) {
       return res
         .status(400)
-        .json({ success: false, message: "Email already exists." });
+        .json({ success: false, message: 'Email already exists.' });
     }
 
     const existingUser = await User.findOne({ username: username });
@@ -46,15 +45,15 @@ const signup = async (req, res) => {
     if (existingUser) {
       return res
         .status(400)
-        .json({ success: false, message: "Username already exists." });
+        .json({ success: false, message: 'Username already exists.' });
     }
 
     // hash password
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
-    
+
     // create the user
-    const PROFILE_PICS = ["/avatar1.png", "/avatar2.png", "/avatar3.png"];
+    const PROFILE_PICS = ['/avatar1.png', '/avatar2.png', '/avatar3.png'];
     const image = PROFILE_PICS[Math.floor(Math.random() * PROFILE_PICS.length)];
     const newUser = new User({
       email,
@@ -69,17 +68,17 @@ const signup = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "New user successfully created.",
+      message: 'New user successfully created.',
       user: {
         ...newUser._doc,
-        password: "",
+        password: '',
       },
     });
   } catch (error) {
-    console.error("Error in the signup controller");
+    console.error('Error in the signup controller');
     res
       .status(500)
-      .json({ success: false, message: "Internal server error", error: error });
+      .json({ success: false, message: 'Internal server error', error: error });
   }
 };
 
@@ -91,7 +90,7 @@ const login = async (req, res) => {
     if (!email || !password) {
       return res
         .status(400)
-        .json({ success: false, message: "All fields are required" });
+        .json({ success: false, message: 'All fields are required' });
     }
 
     const user = await User.findOne({ email: email });
@@ -100,7 +99,7 @@ const login = async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({ success: false, message: "User not found." });
+        .json({ success: false, message: 'User not found.' });
     }
 
     const isPasswordCorrect = await bcryptjs.compare(password, user.password);
@@ -108,24 +107,24 @@ const login = async (req, res) => {
     if (!isPasswordCorrect) {
       return res
         .status(400)
-        .json({ success: false, message: "Incorrect password." });
+        .json({ success: false, message: 'Incorrect password.' });
     }
 
     generateTokenAndSetCookie(user._id, res);
 
     return res.status(200).json({
       success: true,
-      message: "Login successfull.",
+      message: 'Login successfull.',
       user: {
         ...user._doc,
-        password: "",
+        password: '',
       },
     });
   } catch (error) {
-    console.error("Error in login controller");
+    console.error('Error in login controller');
     res.status(500).json({
       success: false,
-      message: "Internal server error.",
+      message: 'Internal server error.',
       error: error,
     });
   }
@@ -133,18 +132,27 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    res.clearCookie("jwt-netflix");
+    res.clearCookie('jwt-netflix');
     return res
       .status(200)
-      .json({ success: true, message: "Logged out successfully." });
+      .json({ success: true, message: 'Logged out successfully.' });
   } catch (error) {
-    console.error("Error in logout controller.");
+    console.error('Error in logout controller.');
     res.status(500).json({
       success: false,
-      message: "Internal server error.",
+      message: 'Internal server error.',
       error: error,
     });
   }
 };
 
-export { signup, login, logout };
+const authCheck = async (req, res) => {
+  try {
+    res.status(200).json({ success: true, user: req.user });
+  } catch (error) {
+    console.error('Erron in authcheck');
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export { signup, login, logout, authCheck };
