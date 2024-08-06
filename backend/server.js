@@ -1,6 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import protectRoute from './middleware/protectRoute.middleware.js';
 import authRoutes from './routes/auth.routes.js';
@@ -10,6 +11,10 @@ import searchRoute from './routes/search.routes.js';
 
 import { ENV_VARS } from './config/config_env.js';
 import { connectDB } from './config/db.js';
+
+// Add these lines to create __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = ENV_VARS.PORT;
