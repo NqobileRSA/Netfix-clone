@@ -1,5 +1,5 @@
 {
-  "editor.fontFamily": "JetBrains Mono Medium",
+  "editor.fontFamily": "JetBrains Mono Regular",
   "editor.fontSize": 14,
   "prettier.tabWidth": 2,
   "prettier.useTabs": false,
