@@ -1,6 +1,6 @@
 {
-  "editor.fontFamily": "JetBrains Mono Regular",
-  "editor.fontSize": 15,
+  "editor.fontFamily": "JetBrains Mono Medium",
+  "editor.fontSize": 14,
   "prettier.tabWidth": 2,
   "prettier.useTabs": false,
   "indentRainbow.ignoreErrorLanguages": ["markdown"],
